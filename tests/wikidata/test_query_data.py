@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 import pytest
 from unittest.mock import patch, mock_open
 from scribe_data.wikidata.query_data import query_data
