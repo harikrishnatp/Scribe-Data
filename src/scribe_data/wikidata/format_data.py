@@ -6,6 +6,8 @@ Formats the data queried from Wikidata using query_verbs.sparql.
 import argparse
 import collections
 
+from rich import print as rprint
+
 from scribe_data.utils import (
     export_formatted_data,
     load_queried_data,
@@ -48,24 +50,56 @@ def format_data(
     )
 
     data_formatted = {}
+    has_multiple_forms = False
 
     for data_vals in data_list:
         lexeme_id = data_vals["lexemeID"]
-        modified_date = data_vals["lastModified"]
 
+        # Initialize a new entry if this lexeme hasn't been seen yet.
         if lexeme_id not in data_formatted:
-            data_formatted[lexeme_id] = {}
+            data_formatted[lexeme_id] = {
+                "lastModified": data_vals["lastModified"],
+                **{
+                    key: value
+                    for key, value in data_vals.items()
+                    if key not in ["lexemeID", "lastModified"]
+                },
+            }
 
-        # Reverse to make sure that we're getting the same order as the query.
-        query_identifiers = list(reversed(data_vals.keys()))
-        query_identifiers.remove("lexemeID")
-        query_identifiers.remove("lastModified")
+        else:
+            # Merge fields for an existing lexeme.
+            for field, value in data_vals.items():
+                if field in ["lexemeID", "lastModified"]:
+                    continue
 
-        for k in query_identifiers:
-            data_formatted[lexeme_id][k] = data_vals[k]
-        data_formatted[lexeme_id]["lastModified"] = modified_date
+                if value:  # Only process non-empty values.
+                    if (
+                        field in data_formatted[lexeme_id]
+                        and data_formatted[lexeme_id][field]
+                    ):
+                        # Merge field values into a comma-separated string using a set for uniqueness.
+                        existing_values = set(
+                            data_formatted[lexeme_id][field].split(" | ")
+                        )
+                        existing_values.add(value)
+                        data_formatted[lexeme_id][field] = " | ".join(
+                            sorted(existing_values)
+                        )
 
+                    else:
+                        data_formatted[lexeme_id][field] = value
+
+    # Convert the dictionary to an ordered dictionary for consistent output.
     data_formatted = collections.OrderedDict(sorted(data_formatted.items()))
+
+    # Check if any values contain pipe separator before exporting.
+    for lexeme_data in data_formatted.values():
+        for value in lexeme_data.values():
+            if isinstance(value, str) and " | " in value:
+                has_multiple_forms = True
+                break
+        if has_multiple_forms:
+            break
 
     export_formatted_data(
         dir_path=dir_path,
@@ -73,6 +107,11 @@ def format_data(
         language=language,
         data_type=data_type,
     )
+
+    if has_multiple_forms:
+        rprint(
+            "[bold yellow]Note: Multiple versions of forms have been returned. These have been combined with '|' in the resulting data fields.[/bold yellow]"
+        )
 
     remove_queried_data(dir_path=dir_path, language=language, data_type=data_type)
 
