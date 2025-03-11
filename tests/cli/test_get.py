@@ -9,8 +9,9 @@ import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
-from scribe_data.cli.get import get_data
 from SPARQLWrapper.SPARQLExceptions import EndPointInternalError
+
+from scribe_data.cli.get import get_data
 
 
 class TestGetData(unittest.TestCase):

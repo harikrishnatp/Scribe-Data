@@ -21,10 +21,10 @@ from scribe_data.utils import (
     DEFAULT_JSON_EXPORT_DIR,
     DEFAULT_SQLITE_EXPORT_DIR,
     DEFAULT_TSV_EXPORT_DIR,
+    check_index_exists,
 )
 from scribe_data.wikidata.query_data import query_data
 from scribe_data.wikidata.wikidata_utils import parse_wd_lexeme_dump
-from scribe_data.utils import check_index_exists
 
 
 def get_data(
