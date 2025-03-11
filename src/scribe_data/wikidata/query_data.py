@@ -16,10 +16,10 @@ from tqdm.auto import tqdm
 
 from scribe_data.utils import (
     LANGUAGE_DATA_EXTRACTION_DIR,
+    check_index_exists,
     format_sublanguage_name,
     language_metadata,
     list_all_languages,
-    check_index_exists,
 )
 from scribe_data.wikidata.wikidata_utils import sparql
 

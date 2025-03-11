@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-import pytest
-from pathlib import Path
-from scribe_data.utils import check_index_exists
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
+
+from scribe_data.utils import check_index_exists
 
 
 @pytest.fixture
